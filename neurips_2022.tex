@@ -1,0 +1,872 @@
+\documentclass{article}
+
+
+% if you need to pass options to natbib, use, e.g.:
+   \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2022
+
+
+% ready for submission
+% \usepackage{neurips_2022}
+
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+    \usepackage[preprint]{neurips_2022}
+
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2022}
+
+
+% to avoid loading the natbib package, add option nonatbib:
+%    \usepackage[nonatbib]{neurips_2022}
+
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage[dvipsnames]{xcolor}         % colors
+
+
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{stfloats}
+\usepackage{bm}
+%% Self-defined macros
+% \usepackage[dvipsnames]{xcolor}
+\newcommand{\kamyar}[1]{\textcolor{red}{Kamyar: #1}}
+\newcommand{\zongyi}[1]{\textcolor{OliveGreen}{{\bf Zongyi:} #1}}
+\newcommand{\aacomment}[1]{\textcolor{red}{{\bf Anima:} #1}}
+\newcommand{\swap}[3][-]{#3#1#2} % just an example
+
+\newcommand{\A}{A}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\bbZ}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\U}{U}
+\newcommand{\LL}{\mathsf{L}}
+\newcommand{\cR}{\mathcal{R}}
+\newcommand{\cK}{\mathcal{K}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cQ}{\mathcal{Q}}
+\newcommand{\cW}{\mathcal{W}}
+
+% F for the Fourier transform
+% G for the target operator
+
+\newcommand{\F}{\mathcal{F}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\Gtrue}{\mathcal{G}^{\dagger}}
+% \newcommand{\L}{\mathcal{L}}
+\newcommand{\Ldata}{\mathcal{L}_{data}}
+\newcommand{\Lpde}{\mathcal{L}_{pde}}
+\newcommand{\Lanchor}{\mathcal{L}_{op}}
+\newcommand{\Lop}{\mathcal{L}_{op}}
+\newcommand{\J}{\mathcal{J}}
+\newcommand{\Jdata}{\mathcal{J}_{data}}
+\newcommand{\Jpde}{\mathcal{J}_{pde}}
+
+
+\newcommand{\T}{\mathcal{T}}
+\newcommand{\Td}{T^{\dagger}}
+\newcommand{\Sd}{S^{\dagger}}
+
+\newcommand{\dt}{\mathrm{d}t}
+
+\newcommand{\K}{\mathcal{K}}
+\newcommand{\I}{\mathbb{I}}
+
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}{Remark}
+\usepackage{enumitem} 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \title{Geometry-Aware Fourier Neural Operator\\ 
+% with Adaptive Mesh for Learning PDEs}
+\title{Fourier Neural Operator with Learned Deformations for PDEs on General Geometries}
+
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+
+\author{%
+  Zongyi Li\\
+  California Institute of Technology
+  \And
+  Daniel Zhengyu Huang\\
+  California Institute of Technology 
+  \And
+  Burigede Liu \\
+  University of Cambridge
+  \And
+  Anima Anandkumar\\
+  California Institute of Technology
+  % examples of more authors
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \AND
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+
+\begin{document}
+
+
+\maketitle
+
+
+\begin{abstract}
+Deep learning surrogate models have shown promise in solving partial differential equations (PDEs). Among them, the Fourier neural operator (FNO) achieves good accuracy, and is significantly faster compared to numerical solvers,  on a variety of   PDEs, such as fluid flows. However, the FNO uses the Fast Fourier transform  (FFT), which is limited to rectangular domains with uniform grids. In this work, we propose a new framework, viz., geo-FNO, to solve PDEs on arbitrary geometries. Geo-FNO learns to deform the input (physical) domain, which may be irregular, into a latent space with a uniform grid. The FNO model with the FFT is applied in the latent space. The resulting geo-FNO model has both the computation efficiency of FFT and the flexibility of handling arbitrary geometries. Our geo-FNO is also flexible in terms of its input formats, viz.,  point clouds, meshes, and design parameters are all valid inputs. We consider a variety of PDEs such as the Elasticity, Plasticity, Euler's, and Navier-Stokes equations, and both forward modeling and inverse design problems. Geo-FNO is $10^5$ times faster than the standard numerical solvers and twice more accurate compared to direct interpolation on existing ML-based PDE solvers such as the standard FNO.
+
+% Deep learning surrogate models have shown promise in solving partial differential equations (PDEs).
+% Among them, the Fourier neural operator (FNO) achieves good accuracy, and is significantly faster compared to numerical solvers,  on a variety of   PDEs, such as fluid flows.
+% However, the FNO uses the Fast Fourier transform  (FFT), which is limited to rectangular domains with uniform grids. 
+% In this work, we propose a new framework, viz., geo-FNO, to solve PDEs on arbitrary geometries. Geo-FNO learns to deform the input (physical) domain, which may be irregular, into a latent space with a uniform grid. The FNO model with the FFT is applied in the latent space. 
+% The resulting Geo-FNO model has both the computation efficiency of FFT and the flexibility of handling arbitrary geometries.
+% Our geo-FNO is also flexible in terms of its input formats, viz.,  point clouds, meshes, and design parameters are all valid inputs.
+% We consider a variety of PDEs such as the Elasticity, Plasticity, Euler's, and Navier-Stokes equations
+% , and both forward modeling and inverse design problems. 
+% Geo-FNO is $10^5$ times faster than the standard numerical solvers and twice more accurate compared to direct interpolation on existing ML-based PDE solvers such as the standard FNO.
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Introduction}
+Data-driven engineering design has the potential to accelerate the design process by orders of magnitude compared to conventional methods. It can enable extensive exploration of the design space and yield new designs with far greater efficiency. This is because the conventional design process requires repeated evaluations of partial differential equations~(PDEs) for optimization, which can be time-consuming. Examples include computational fluid dynamics (CFD) based aerodynamic design and topology optimization for additive manufacturing. 
+Deep learning approaches have shown promise in speeding up PDE evaluations and automatically computing derivatives, hence accelerating the overall design cycle.
+However, most deep learning approaches currently focus on predicting a few important quantities in the design process, e.g. lift and drag in aerodynamics, as opposed to completely emulating the entire simulation (i.e., pressure or Mach number fields in aerodynamics). This limits the design space to be similar to the training data, and may not generalize to new geometries and scenarios. In contrast, we develop an efficient deep learning-based approach for design optimization, which emulates the entire PDE simulation on general geometries leading to a versatile tool for exploring the design space. 
+ 
+%and hence the design process is more interpretable for designers. Moreover, our approach is flexible for complex domain shapes or input meshes and effective to handle design shape changes. 
+
+\paragraph{Deformable meshes.}
+Solutions of PDEs frequently have high variations across the problem domain, and hence some regions of the domain often require a finer mesh compared to other regions for obtaining accurate solutions. For example, in airfoil flows, the region near the airfoil requires a much higher resolution for accurately modeling the aerodynamics, as shown in Figure \ref{fig:fluid}.
+To address such variations, deformable mesh methods such as adaptive finite element methods (FEM) have been developed. Two adaptive mesh methods are commonly used: the adaptive mesh refinement method that adds new nodes (and higher-order polynomials), and the adaptive moving mesh method that relocates the existing nodes\cite{babuvska1990p,huang2010adaptive}. 
+While mesh refinement is popular and easy to use with traditional numerical solvers, it changes the mesh topology and requires special dynamic data structures, which reduce speed and make it hard for parallel processing. 
+% especially on GPUs \aacomment{did u verify}. 
+On the other hand, the adaptive moving mesh methods retain the topology of the mesh, making it possible to integrate with spectral methods. 
+Spectral methods solve the equation on the spectral space (i.e., Fourier, Chebyshev, and Bessel), which usually have exponential convergence guarantees when applicable~\cite{gottlieb1977numerical}. 
+However, these spectral methods are limited to simple computational domains with uniform grids. When the mesh becomes non-uniform, spectral basis functions are no longer orthogonal and the spectral transform is no longer invertible, so the system in the Fourier space is not equivalent to the original one anymore. Thus, traditional numerical methods are slow on complex geometries due to computational constraints. 
+% The resulting linear system of equations on the Fourier space becomes dense, which renders the fast Fourier transform~(FFT) algorithm infeasible. 
+
+\paragraph{Neural operators.}
+Deep learning surrogate models have recently yielded promising results in solving PDEs.  One class of such models is data-driven, and they directly approximate the input-output map through supervised learning. Such models have achieved significant speedups compared to traditional solvers in numerous applications~\citep{Zabaras, bhatnagar2019prediction}. Among them, the graph neural networks have been studied for complex geometries~\citep{allen2022physical, sanchez2020learning}
+Recently, a new class of data-driven models known as neural operators aim to directly learn the solution operator of the PDE in a mesh-invariant manner. Unlike standard deep learning models, such as convolutional neural networks from computer vision, neural operators are invariant to discretization and hence, better suited for solving PDEs. They generalize the previous finite-dimensional neural networks to learn operator mapping between infinite-dimensional function spaces. Examples include Fourier neural operator (FNO)~\citep{li2020neural}, graph neural operator \cite{li2020multipole}, 
+% \aacomment{cite our neurips paper} 
+and DeepONet \citep{lu2019deeponet}.   We consider FNO~\citep{li2020fourier} in this paper due to its superior  cost-accuracy tradeoff~\citep{de2022cost}. 
+FNO implements a series of layers computing global convolution operators with the fast Fourier transform (FFT) followed by mixing weights in the frequency domain and inverse Fourier transform. These global convolutional operators are interspersed with non-linear transformations such as GeLU. 
+By composing global convolution operators and non-linear activations, FNO can approximate highly non-linear and non-local solution operators.
+% \aacomment{expand. is this what we use?}
+% Zongyi: yes, we do use GeLU
+FNO and its variants are able to simulate many PDEs such as the Navier-Stokes equation and seismic waves, do high-resolution weather forecasts, and predict CO2 migration with unprecedented cost-accuracy tradeoff~\citep{pathak2022fourcastnet, yang2021seismic, wen2022u}.
+
+
+
+\paragraph{Limitations of FNO on irregular geometries.}
+While FNO is fast and accurate, it has limitations on the input format and the problem domain. Since FNO is implemented with FFT, it can be only applied on rectangular domains with uniform meshes.  When applying it to irregular domain shapes, previous works usually embed the domain into a larger rectangular domain~\citep{lu2022comprehensive}. However, such embeddings are less efficient and wasteful, especially for highly irregular geometries.
+Similarly, if the input data is in the form of non-uniform meshes such as triangular meshes,   previous works use basic interpolation methods between the input non-uniform mesh and a uniform mesh on which FFT is computed~\cite{li2020fourier}. This can cause large interpolation errors, especially for non-linear PDEs. 
+%In this work, we aim to develop a geometry-aware FNO method that works for arbitrary meshes and domain shapes. Instead of transforming all problems into a rectangular domain with the uniform mesh, we learn deformable meshes along with the solution operator in an end-to-end manner. 
+
+%design adaptive meshes tailored to each problem geometry. We borrow the idea of the adaptive moving mesh method from traditional numerical solvers. Instead of transforming all problems into a rectangular domain with a uniform mesh,
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/geo-FNO5.png}
+    \caption{Geometry-aware FNO}
+    \label{fig:GFNO}
+    {\small  
+    \textbf{Top:}  The geo-FNO model deforms the input functions from irregular physical space to a uniform latent space. After the standard FNO \cite{li2020fourier} is applied, the geo-FNO will deform the latent solution function back to the physical space. $P$, $Q$ are lifting and projection. $\F$ and $\F^{-1}$ are the Fourier transforms. $K$ is a linear transform  \eqref{eq:G}. 
+    \textbf{Bottom:} The deformation, either given or learned,  defines a correspondence between the physical space and computational space. It induces an adaptive mesh and a generalized Fourier basis on the physical space.} 
+\end{figure}
+
+\paragraph{Our contributions.}
+% Inspired by the Chebyshev transform and adaptive moving meshes methods, 
+To address the above challenges, we develop a geometry-aware Fourier neural operator (Geo-FNO) and we summarize our contributions below:
+\begin{enumerate}[leftmargin=*]
+    \item We propose a geometry-aware FNO framework (geo-FNO) that works on arbitrary geometries and a variety of input formats such as point clouds, non-uniform meshes,  and design parameters.
+    \item Geo-FNO deforms the irregular input domain into a uniform latent mesh on which the FFT can be applied. Such deformation can be fixed or learned with the FNO architecture in an end-to-end manner. For the latter case, we design a neural network to model the deformation and train it end-to-end with geo-FNO.
+    \item We experiment on different geometries for the Elasticity, Plasticity, Euler's, and Navier-Stokes equations
+    on both forward modeling and inverse design tasks. 
+    Geo-FNO has up to $10^5$  acceleration compared to the numerical solver, as well as half the error rate compared to previous interpolation-based methods.
+\end{enumerate}
+
+
+
+Geo-FNO thus learns a deformable mesh along with the solution operator in an end-to-end manner by applying a series of FFTs and inverse FFTs on a uniform latent mesh, as shown in Figure \ref{fig:GFNO}.   
+% on the regular computational domain without suffering from the loss of orthogonality. 
+Thus, geo-FNO combines both the computational efficiency of the FFT  and the flexibility of learned deformations. It is as fast as the original FNO but can represent the variations in solutions and domain shapes more efficiently and accurately. The learned deformation from the physical irregular domain to a uniform computational domain is inspired by the traditional adaptive moving mesh method \citep{huang2010adaptive}. However, the adaptive moving mesh method has not had much success with traditional numerical solvers due to the loss of orthogonality of the spectral transform. On a deformed mesh, the system in the Fourier space is no longer equivalent to the original system, so it does not make sense to solve the PDE in the Fourier space. 
+However, geo-FNO does not have this limitation. It does not involve solving equations on the Fourier space. Instead, geo-FNO approximates the solution operator via the computation on Fourier space in a data-driven manner.
+
+In principle, our geo-FNO framework can be directly extended to general topologies. Given complex input topology we can apply the decomposition techniques such as triangle tessellation to divide the domain into sub-domains such as each sub-domain is regular. Similarly, for other input formats such as the signed distance functions (SDF), we can sample collocation points. Furthermore, it is possible to extend the geo-FNO framework to the physics-informed neural operator setting which incorporates PDE constraints \citep{li2021physics}. Since the deformation is parameterized by a neural network, we can obtain the exact derivatives and apply the chain rule to compute the residual error.
+% \aacomment{talk about topology decomposition and how SDF can be dealt with}
+% \aacomment{also add a comment about PINN and PINO and in the future, we can consider that. right now we are limited to data-driven. after u add this we can debate if this is better in the conclusion section}
+
+% \paragraph{Zongyi: questions}
+% \begin{enumerate}
+%     \item should we separate the problem of irregular input meshes $\T$ and irregular domain shapes $D$? yes
+%     \item optional enhanced FNO architecture? yes 
+%     \item given adaptive meshes, iterative-updated adaptive meshes,  learned adaptive meshes using supervised learning, and the end-to-end learned adaptive mesh. yes 
+%     \item data-driven methods are less sensitive to mesh resolution compared to solvers. goes for hard problems
+% \end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Problem Settings and Preliminaries}
+\paragraph{Problem settings.}
+In this work, we consider parametric partial differential equations defined on various domains. Assume the problem domain $D_{a}$ is parameterized by design parameters $a \in \mathcal{A}$, which follows some distribution $a \sim \nu$. For simplicity, we assume all the domains are bounded, orientable manifolds embedded in some background Euclidean space $\Omega$ (e.g., $\R^3$). We consider both stationary problems and time-dependent problems of the following forms:
+\begin{align}\label{eq:dynamic}
+\begin{split}
+    \frac{du}{dt} &= \mathcal{R}(u), \qquad  \text{in } D_{a} \times T \\
+    u &= u_0, \qquad \qquad \text{in } D_{a} \times \{0\} \\
+    u &= u_b, \qquad \quad \:\:\: \text{in } \partial D_{a} \times T 
+\end{split}
+\end{align}
+where \(u_0 \in \mathcal{U}(0)\) is the initial condition;  \(u_b\) is the boundary condition; and \(u(t) \in \mathcal{U}(t)\) Banach space for \(t > 0\) is the target solution function. \(\mathcal{R}\) is a possibly non-linear differential operator. We assume that \(u\) exists and is bounded for all time and for every $u_0 \in \mathcal{U}(t)$ at every $t \in T$. This formulation gives rise to the solution operator \(\Gtrue : (a, u_0, u_b) \mapsto u\). Prototypical examples include fluid mechanics problems such as the Burgers' equation and the Navier-Stokes equation and solid mechanics problem such as elasticity and plasticity defined on various domain shapes such as airfoils and pipes. In this paper, we assume the initial condition $u_0$ and the boundary condition $u_b$ are fixed. Specifically, we also consider stationary problem $\mathcal{R}(u) = 0$ where $u_0$ is not necessary. In this case, the solution operator simplifies to \(\Gtrue : a \mapsto u\).
+
+
+\paragraph{Input formats.}
+In practice, the domain shape can be parameterized in various ways. It can be given as meshes, functions, and design parameters.
+In the most common cases, the domain space is given as a meshes (point clouds) $a = \T = \{x_i\}^{N} \subset \Omega $, such as triangular tessellation meshes used in many traditional numerical solvers. 
+Alternatively, the shapes can be described by some functions $a = f: \Omega \to \R$. For example, if the domain is a 2D surface, then it can be parameterized by its boundary function $f: [0,1]\to \partial D$. Similarly, the domain can be described as signed distance functions (SDF) or occupancy functions. These are common examples used in computer vision and graphics.
+At last, we also consider specific design parameters $a \in \R^d$. For example, it can be the width, height, volume, angle, radius, and the spline nodes used to model the boundary. The design parameters restrict the domain shape in a relatively smaller subspace of all possible choices. This format is most commonly used in a design problem, which is easy to optimize and manufacture. For the later two cases, it is possible to sample a mesh $\T$ based on the shape.
+
+\subsection{Learning the solution operator}
+Given a PDE as defined in \eqref{eq:dynamic} and the corresponding solution operator \(\Gtrue\), one can use a neural operator ${\G_{\theta}}$ with parameters ${\theta}$ as a surrogate model to approximate \(\Gtrue\). 
+Usually we assume a dataset $\{a_j, u_j\}_{j=1}^N$ is available, where $\Gtrue(a_j) = u_j$ and $a_j \sim \mu$ are i.i.d. samples from some distribution \(\mu\) supported on \(\mathcal{A}\). In this case, one can optimize the solution operator by minimizing the empirical data loss on a given data pair
+\begin{align}
+\label{eq:pinn-data}
+\mathcal{L}_{\text{data}}(u, \G_\theta(a)) = \|u - \G_\theta(a)\|_{\mathcal{U}}^2= \int_D |u(x) - \G_\theta(a)(x) |^2 \mathrm{d}x
+\end{align}
+The operator data loss is defined as the average error across all possible inputs
+\begin{align}
+\label{eq:op-data}
+\begin{split}
+\mathcal{J}_{\text{data}}( \G_\theta) = \|\Gtrue - \G_\theta\|^2_{L^2_\mu(\mathcal{A};\mathcal{U})} = \E_{a \sim \mu}[ \mathcal{L}_{\text{data}}(a,\theta)] \approx \frac{1}{N} \sum_{j=1}^N \int_D |u_j (x) - {\G_\theta}(a_j)(x) |^2 \mathrm{d}x.
+\end{split}
+\end{align}
+% Similarly, one can define the operator PDE loss as
+% \begin{align}
+% \label{eq:op-pde}
+% \begin{split}
+% \mathcal{J}_{\text{pde}}( \G_\theta) = \E_{a \sim \mu}[ \mathcal{L}_{\text{pde}}(a,  \G_\theta(a)) ].
+% \end{split}
+% \end{align}
+
+\subsection{Neural operator }
+
+In this work, we will focus on the neural operator model designed for the operator learning problem.
+The neural operator, proposed in \citep{li2020neural}, is formulated as an generalization of standard deep neural networks to operator setting. Neural operator compose linear integral operator $\cK$ with pointwise non-linear activation function \(\sigma\) to approximate highly non-linear operators.
+\begin{definition}[Neural operator $\G_\theta$] Define the neural operator
+\begin{equation}
+\label{eq:G}
+    \G_{\theta} \coloneqq \cQ \circ(W_{L} + \cK_{L} + b_L) \circ \cdots \circ \sigma(W_1 + \cK_1 + b_1) \circ \cP
+\end{equation}
+where \(\cP: \R^{d_a} \to \R^{d_{1}}\), \(\cQ: \R^{d_{L}} \to \R^{d_u}\) are the pointwise neural networks that encode the lower dimension function into higher dimensional space and vice versa. The model stack $L$ layers of $\sigma(W_{l} + \cK_{l} + b_{l})$ where \(W_l \in \R^{d_{{l+1}} \times d_{l}}\) are pointwise linear operators (matrices), \(\cK_l: \{D \to \R^{d_{l}}\} \to \{D \to \R^{d_{l+1}}\}\) are integral kernel operators, $b_l: D \to \R^{d_{l+1}} $ are the bias term made of a linear layer, and \(\sigma\) are fixed activation functions. The parameters $\theta$ consists of all the parameters in $\cP, \cQ, W_l, \cK_l, b_l$.
+\end{definition}
+
+
+\begin{definition}[Fourier integral operator $\cK$] Define the Fourier integral operator
+\begin{equation}
+\label{eq:Fourier}
+\bigl(\cK(\phi)v_t\bigr)(x)=   
+\F^{-1}\Bigl(R_\phi \cdot (\F v_t) \Bigr)(x) \qquad \forall x \in D 
+\end{equation}
+where $R_\phi$ is the Fourier transform of a periodic function $\kappa: \bar{D} \to \R^{d_v \times d_v}$ parameterized by \(\phi \in \Theta_\cK\).
+\end{definition}
+The Fourier transform $\F$ is defined as 
+\begin{align}
+    (\F v)(k) 
+    = \langle v, \psi(k) \rangle_{L(D)}
+    = \int_x v(x) \psi(x,k) \mu(x) 
+    \approx \sum_{x\in\T} v(x) \psi(x,k)
+\end{align}
+where $\psi(x,k) = e^{2i \pi \langle x, k \rangle} \in L(D)$ is the Fourier basis and $\T$ is the mesh sampled from the distribution $\mu$.
+In \cite{li2020neural}, the domain $D$ is assumed to be a periodic, square torus and the mesh $\T$ is uniform, so the Fourier transform $\F$ can be implemented by the fast Fourier transform algorithm (FFT). In this work, we aim to extend the framework to non-uniform meshes and irregular domains.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Geometry-Aware Fourier Neural Operator }
+The idea of the geometry-aware Fourier neural operator is to deform the physical space into a regular computational space so that the fast Fourier transform can be performed on the computational space. 
+Formally, we want to find a diffeomorphic deformation $\phi_a$ between the input domain $D_a$ and the unit torus $D^c = [0,1]^d$. 
+The computational mesh $D^c$ is shared among all input space $D_a$. It is equipped with a uniform mesh and standard Fourier basis. Once the coordinate map $\phi_a$ is determined, the map induces an adaptive mesh and deformed Fourier basis on the physical space. In the community of numerical PDEs, the diffeomorphism corresponds to the adaptive moving mesh \citep{huang2010adaptive}. 
+
+
+\subsection{Deformation from the physical space to the computational space.}
+Let $D_a$ be the physical domain and $D^c$ be the computational domain Let $x\in D_a$ and $\xi \in D^c$ be the corresponding mesh points. Denote the input meshes as $\T^i = \{x^{(i)}\} \subset D_a$ and the computational meshes as $\T^c = \{\xi^{(i)}\} \subset D^c$. For simplicity, we assume the output mesh is the same as the input mesh.
+The adaptive moving mesh is defined by a coordinate transformation $\phi_a$ that transforms the points from the computational mesh to the physical mesh, as shown in Figure \ref{fig:GFNO} (b)
+\begin{equation}
+\begin{split}
+    \phi_a: D^c &\to D_a\\
+     \xi &\mapsto x 
+\end{split}
+\end{equation}
+Ideally, $\phi_a$ is a diffeomorphism, meaning it has an inverse $\phi_a^{-1}$, and both $\phi_a$ and $\phi_a^{-1}$ are smooth. When such a diffeomorphism exists, there is a correspondence between the physical space and the computational space.
+Let $\T^c \subset D^c$ be the uniform mesh and $\psi^c \in L(D^c)$ be the standard spectral basis defined on the computational space. The coordinate transformation $\phi_a \subset D_a$ induces an adaptive mesh $\T_a$ and adaptive spectral basis $\psi_a \in L(D_a)$ (pushforward)  
+\begin{equation}
+\begin{split}
+    \T_a &\coloneqq \phi_a(\T^c)\\
+    \psi_a(x) &\coloneqq \psi^c\circ\phi_a^{-1}(x) 
+\end{split}
+\end{equation}
+It can be interpreted as to solve the system $\mathcal{R}(v)=0$ with adaptive mesh $\T_a$ and generalize basis $\psi_a$. Conversely, for any function defined on the physical domain $v \in L(D_a)$, it can be transformed to the computational domain $v^c \in L(D^c)$ (pullback) 
+\begin{equation}
+\begin{split}
+     v^c(\xi) \coloneqq  v(\phi_a(\xi)) 
+\end{split}
+\end{equation}
+Similarly, for any system of equations $\mathcal{R}(v)=0$ such as \eqref{eq:dynamic} defined on the physical domain $D$, the transformation $\phi_a$ induced a new deformed system of equations $\mathcal{R}^c(v^c)=0$.
+It can be interpreted as to solve the deformed system $\mathcal{R}^c(v^c)=0$ with uniform mesh $\T^c$ and standard basis $\psi^c$.
+
+\subsection{Geometric Fourier transform}
+Based on the deformation, we can define the spectral transform in the computational space.
+Fourier transforms conducted in the computational domain are standard, since we have a uniform structured mesh in the computational domain. In this subsection, We will introduce a geometric spectral transform between the function $v(x)$ in the physical domain $D_a$ and the function $\hat{v}(k)$ in the spectral space of the computation domain $D^c$.
+
+To transform the function $v(x)$ from the physical domain to the spectral space of the computation domain, we define the forward transform (abuse the notation, denote $\phi = \phi_a$):
+\begin{align}
+    (\F_{a} v)(k) &:= \int_{D^c} v^c(\xi)  e^{- 2i \pi \langle \xi, k\rangle}  d\xi\\
+                  &= \int_{D} v(x)  e^{- 2i \pi \langle \phi^{-1}(x), k\rangle}  \lvert\textrm{det}[ \nabla_x \phi^{-1}(x)]\rvert dx \\
+                  &\approx \frac{1}{|\T^i|}\sum_{x\in \T^i}  m(x) v(x)  e^{- 2i \pi \langle \phi^{-1}(x), k\rangle} \label{eq:Fa}
+\end{align}
+where the weight $m(x) = \lvert\textrm{det}[ \nabla_x\phi^{-1}(x)]\rvert / \rho_a(x)$
+and $\rho_a$ is a distribution from which the input mesh $\T^i$ is sampled.
+Notice, in many cases, we have an input mesh $\T^i$ so that computational mesh $ \phi^{-1}(\T^i) = T^c$ is uniform. In this case, $\lvert\textrm{det}[ \nabla_x\phi^{-1}(x)]\rvert = \rho_a(x)$, and $m(x) = 1$ can be omitted. Other choices can be made, for example we can define
+$m(x)$ using heuristics depending on the solution $u(x)$ or residual error. The weight $m(x)$ corresponds to the monitor functions in the literature of adaptive meshes, where the adaptive mesh is finer near $x$,  when $m(x)$ is large.
+
+To transform the spectral function $\hat{v}(k)$ from the spectral space of the computation domain to the physical domain, we define the inverse transform
+\begin{align}  \label{eq:iFa}
+    (\F^{-1}_{a} \hat{v})(x) = (\F^{-1} \hat{v})(\phi^{-1}(x)) 
+                             = \sum_{k}  \hat{v}(k) e^{2i \pi \langle \phi^{-1}(x), k \rangle }
+\end{align}
+It is worth mentioning that $\F_{a} \circ \F^{-1}_{a} = I$, since both are defined on the computational space.
+\begin{align}
+    (\F_{a} \circ \F^{-1}_{a} \hat{v})(k) &= \int_{D^c} (\F^{-1}_{a} \hat{v})^c (\xi)  e^{- 2i \pi \langle \xi, k\rangle}  d\xi \\
+                                          &= \int_{D^c} \sum_{k}  \hat{v}(k) e^{2i \pi \langle \xi, k \rangle } e^{- 2i \pi \langle \xi, k\rangle}  d\xi
+                                       \quad   = \hat{v}(k)
+\end{align}
+
+Notice both $\F_a$ \eqref{eq:Fa} and $\F^{-1}_a$ \eqref{eq:iFa} only involve the inverse coordinate transform $\phi^{-1}: D_a \to D^c$. Intuitively, in the forward Fourier transform $\F_a$, we use  $\phi^{-1}$ to transform the input function to the computational space, while in the inverse Fourier transform $\F^{-1}_a$, we we use  $\phi^{-1}$ to transform the query point to the computational space to evaluate the Fourier basis. It makes the implementation easy that we only need to define  $\phi^{-1}$.
+
+
+% Instead of the standard Fourier transform $(\F v)(k) 
+% = \langle v, \psi(k) \rangle_{L(D)}$, we perform the deformed Fourier transformed defined on the computational space as the inner product between the defined function $v^c=\phi^\#  v$ and the standard basis $\psi^c(k)$: 
+% \begin{align}
+%     (\F_{a} v)(k) 
+%     = \langle v^c, \psi^c(k) \rangle_{L(D^c, \mu^c)}
+%     \approx \sum_{\xi \in \T^c} v^c(\xi) \psi^c(\xi, k)
+% \end{align}
+% Similar, this computation can be defined on the physical space as the inner product between the original function $v$ and the deformed basis $\psi_{a}(x, k) = \psi^c(\phi^{-1}(x),k)$ 
+% \begin{align}
+%     (\F_{a} v)(k) 
+%     =  \langle v,  \psi_{a}(k) \rangle_{L(D_a, \phi_{\#}\mu^c)}
+%     \approx  \sum_{x \in \T} v(x) \psi_{a}(x, k) 
+% \end{align}
+% Notice we assume the mesh $T^c\sim \mu^c$ is sampled from a uniform measure defined on $T^c$, therefore $T\sim \phi_{\#}\mu^c $. If $T$ is given from a fixed measure $\mu_a$, we should weight the summation by $\det(\phi)/\mu_a$ such as $T^c$ is uniform.
+
+% When incorporating the coordinate map, the Fourier basis changes from $e^{2i \pi \langle x, k \rangle} $ to $e^{2i \pi \langle \xi, k \rangle}$, where $\xi = \phi^{-1}(x)$. Therefore the new Fourier layer can be defined as.
+% \begin{align}
+%     (\F_{a} v)(k) = \sum_{x=0}^{s}  v(x) e^{- 2i \pi \langle \phi^{-1}(x), k \rangle/s }, \quad
+%     (\F^{-1}_{a} \hat{v})(x) = \sum_{k=0}^{s}  \hat{v}(k) e^{2i \pi \langle \phi^{-1}(x), k \rangle/s }
+% \end{align}
+
+
+% Notice the deformed basis $\{\psi_a(k)\}_{k=0}^{\infty}$ is no longer orthogonal. It is not necessarily true that $v = \sum_k (\F_{a} v)(k) \psi_a(k)$ nor $\F^{-1}_{a} \circ \F_{a} = I$. However, the neural operator framework does not require orthogonality of the spectral decomposition. It has the desired efficient and expressiveness. 
+\subsection{Architecture of geo-FNO and the deformation neural network}
+We consider two scenarios: (1) the coordinate map is given, and (2) to learn a coordinate map. In many cases, the input mesh $\T^i$ is non-uniform but structured. For example, the meshes of airfoils are usually generated in the cylindrical structure. If the input mesh can be viewed as a multi-dimensional array $\T^i[i_1,\ldots,i_d]$, then its indexing induces a canonical coordinate map 
+\begin{equation}
+\label{eq:structured}
+\phi^{-1}: \T^i[i_1,\ldots,i_d] \mapsto (i_1/s_1,\ldots,i_d/s_d)    
+\end{equation}
+Especially, since $(i_1/s_1,\ldots,i_d/s_d)$ is a uniform mesh, such one can directly use the FFT. In this case, Geo-FNO reduces to a standard FNO directly applied to the input meshes.
+
+When we need to learn a coordinate map, we parameterize the coordinate map $\phi^{-1}$ as a neural network and learn it along with the solution operator $G_\theta$ in an end-to-end manner with loss \eqref{eq:op-data}. 
+\begin{equation}
+\label{eq:mesh}
+\phi_{\theta}^{-1}: (x_1,x_2,a) \mapsto (\xi_1, \xi_2)  
+\end{equation}
+The deformation network takes input $(x_1,x_2,a)$, where $a$ is the geometry parameters. We impose a skip connection $\xi = f(x,a) + x$ and only learn $f$. This formulation initializes  $f$ around zero and $\phi^{-1}$ around an identity map. In contrast, $\phi^{-1}$ will be initialized as a zero function without the skip connection.
+Follow the works of implicit representation \citep{mildenhall2020nerf}, \citep{sitzmann2020implicit}, we use sinusoidal features in the first layers $sin(B x), B = 2^i$ to improve the expressiveness of the network. %for $i = 1,\ldots,n$ . 
+
+As shown in Figure \ref{fig:GFNO}, Geo-FNO has a similar architecture as the standard FNO, but with a deformation in the input and output
+\begin{equation}
+\label{eq:G}
+    \G_{\theta} \coloneqq \cQ \circ(W_{L} + \cK_{L}(\phi) + b_L) \circ \cdots \circ \sigma(W_1 + \cK_1(\phi) + b_1) \circ \cP
+\end{equation}
+Specially, if the input is given as a point cloud, we will apply the geometric Fourier transform $ \F_a$ \eqref{eq:Fa} in the first Fourier convolution operator $\cK_1$, and the inverse geometric Fourier transform $\F^{-1}_a$ \eqref{eq:iFa} in the last layer $\cK_L$.
+As a special case, if the input is given as a structured mesh, we define the coordinate as \eqref{eq:structured}, $\F_a, \F^{-1}_a$ reduce to standard FFT and geo-FNO reduces to the standard FNO.
+
+% We generalize the pointwise lifting $\cP$ and projection $\cQ$ to global operator that transform between the physical domains $D$ and the computational domain $D^c$
+% The geometric FNO consists of these components: the input transformation $\cP = \Phi^{-1}$, the FNO operator $\G^c =  \circ(W_{L} + \cK_{L}) \circ \cdots \circ \sigma(W_1 + \cK_1)$, and the output transformation  $\cQ = \Phi$. We aim to approximate the target solution operator $\Gtrue$ such that
+
+% Since the new FNO operator $\G^c$ is defined on the deformed system of equation $\mathcal{R}^c(\hat{u})$, we make the transformation information as put of the input for each convolution operator $ \cK_{l}(\phi)$.
+
+
+
+
+\subsection{Fourier continuation}
+For some PDE problems, the input domain has an irregular topology that is not homeomorphic to a disk or a torus. Consequentially, there does not exist a diffeomorphism between $D_a$ and $D^c$. In this case, we will first embed the input domain into a larger regular domain
+\[ D_a \xhookrightarrow{i} \bar{D}_a \]
+such as $\bar{D}_a$ is diffeomorphic to $D^c$. For example, the elasticity problem \ref{ssec:solid} has a hole in its square domain. We can first embed the domain into a full square by completing the hole. Such embedding corresponds to the Fourier continuation \citep{bruno2007accurate} techniques used in conventional spectral solvers. Usually it requires to extend the function $u \in \mathcal{U}(D_a)$  to $\bar{u} \in \mathcal{U}(\bar{D}_a)$ by fitting polynomials. However, in the data-driven setting, such extension can be done implicitly during the training. We only need to compute the loss on the original space $D_a$ and discard the extra output from the underlying space $\bar{D}_a$.
+
+
+
+% \section{Theoretical guarantees.}
+
+% \subsection{Universal geometries and topologies}
+
+% \subsection{Approximation theorem}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}
+    \centering
+    \includegraphics[width=14cm]{figures/gfno-solid.png}
+    \caption{Elasticity and Plasticity \ref{ssec:solid}}
+    \label{fig:solid}
+\end{figure}
+
+\section{Numerical Examples}
+We compare the Geo-FNO against other machine learning models on PDEs with various geometries. As shown in Figure \ref{fig:solid} and \ref{fig:fluid}, Geo-FNO can be applied on irregular domains and non-uniform meshes. It is more accurate than direct interpolation on existing ML-based PDE solvers such as the standard FNO\citep{li2020fourier} and UNet\citep{ronneberger2015u}, as well as mesh-free methods such as Graph neural operators (GNO) \citep{li2020neural} and DeepONet \citep{lu2019deeponet}. Meanwhile, Geo-FNO perseveres the speed of standard FNO. It can accelerate the numerical solvers up to $10^5$ times on the airfoil problem. All experiments are performed on a single Nvidia 3090 GPU. With no special mention, we train all the model with 500 epochs with an initial learning rate of $0.001$ which decays by half every 100 epochs. We use the relative L2 error for both the training and testing. The detailed implementation and be found in the appendix.
+
+\subsection{Structural Mechanics}
+\label{ssec:solid}
+\paragraph{Hyper-elastic material.} The governing equation of a solid body can be written as
+\begin{align*}
+\rho^s \frac{\partial^2 \bm{u}}{\partial t^2} + \nabla \cdot \bm{\sigma} &= 0
+\end{align*}
+where $\rho^s$ is the mass density, $\bm{u}$ is the displacement vector, $\bm{\sigma}$ is the stress tensor. Constitutive models, which relate the strain tensor $\bm{\epsilon}$ to the stress tensor, are required to close the system. 
+We consider the unit cell problem $\Omega = [0,1]\times[0,1]$ with an arbitrary shape void at the center, which is depicted in Figure \ref{fig:solid} (a). The prior of the void radius is $r = 0.2 + \frac{0.2}{1 + \exp(\tilde{r})}$ with $\tilde{r} \sim \N(0, 4^2(-\nabla + 3^2)^{-1})$, which embeds the constraint $0.2 \leq r \leq 0.4$. 
+%
+The unit cell is clamped on the bottom edges and tension traction $\bm{t} = [0,\,100]$ is applied on the top edge.
+The material is the incompressible Rivlin-Saunders material~\cite{pascon2019large} with energy density function parameters $C_1 = 1.863\times10^5$ and $C_1 = 9.79\times10^3$.
+We generate $1000$ training data and $200$ test data with a finite element solver~\cite{huang2020learning} with about $100$ quadratic quadrilateral elements.
+It takes about $5$ CPU seconds for each simulation.
+The inputs $a$ are given as point clouds with a size around 1000. The target output is stress.
+% The Gaussian quadrature point locations and the von Mises stress on these quadrature points are used as input and output data. 
+
+
+
+\paragraph{Plasticity}
+We consider the plastic forging problem where a block of material $\Omega = [0,L] \times [0,H]$ is impacted by a frictionless, rigid die at time $t = 0$. The die is parameterized by an arbitrary function $S_d \in H^1([0,L];\mathbb{R})$ and traveled at a constant speed $v$. The governing equation is the same as the previous example but with an elasto-plastic constitutive model 
+% of the material is given by 
+% \begin{align*}
+% \sigma = \textbf{C} : (\epsilon-\epsilon_p), \quad \quad
+% \dot{\epsilon}_p = \lambda \nabla_{\sigma} f(\sigma), \quad \quad
+% f(\sigma) = \sqrt{\frac{3}{2}}|\sigma-\frac{1}{3}\text{tr}(\sigma),\cdot I|_F - \sigma_Y
+% \end{align*}
+% where $\lambda$ is the plastic multiplier constrained by
+% $\lambda \geq 0 , f(\sigma)  \leq 0, $
+% and 
+% $\lambda \cdot f(\sigma)  = 0.$
+with isotropic stiffness tensor $\mathbf{C}$ with Youngs modulus $E = 200$ GPa and Poisson's ratio 0.3. The yield strength $\sigma_Y$ is set to 70 MPa with the mass density $\rho^s = 7850 \text{kg}\cdot \text{m}^{-3}$.  
+We generate 900 training data and 80 test data by using the commercial Finite Element software ABAQUS \cite{0b112d0e5eba4b7f9768cfe1d818872e}, using 3000 4-node quadrilateral bi-linear elements (CPS4R in ABAQUS's notation). Without lose of generality, we fix $L = 50$mm, $H = 15 $mm, and $v = 3$ ms$^{-1}$. For each sample, we generate a random function $S_d$ by randomly sampling $S_d(x_k)$ on $\{x_k = k L/7; k = 0,..,7\}$ with a uniform probability measure. The die geometry is then generated by interpolating $S_d(x_k)$ using piecewise Cubic Hermit Splines. It takes about 600 CPU seconds for each simulation. The target solution operator maps from the shape of the die to the time-dependent mesh grid and deformation. The data is given at $101\times31$ structured meshes on 20 time steps.   
+
+\begin{figure}
+    \centering
+    \includegraphics[width=14cm]{figures/gfno-fluid.png}
+    \caption{The airfoil flows and pipe flows \ref{ssec:fluid}}
+    \label{fig:fluid}
+\end{figure}
+
+\begin{table*}
+\begin{center}
+\begin{tabular}{l|crc|cc}
+% \multicolumn{1}{c}{\bf Data}
+\multicolumn{1}{c}{\bf Model}
+&\multicolumn{1}{c}{\bf mesh size}
+&\multicolumn{1}{c}{\bf model size}
+&\multicolumn{1}{c}{\bf training time}
+&\multicolumn{1}{c}{\bf training error }
+&\multicolumn{1}{c}{\bf testing error }\\
+\hline 
+\hline 
+Geo-FNO (learned) & 972 & 1546404 & 1s &\textbf{0.0125}& \textbf{0.0229}  \\
+GraphNO          & 972 & 571617 & 32s &$0.1271$& $0.1260$\\
+DeepONet     & 972 & 1025025 & 45s &$0.0528$& $0.0965$\\
+\hline
+Geo-FNO (R mesh) & $1681$ & 1188417 & 0.6s &$0.0308$& $0.0536$\\
+Geo-FNO (O mesh) & $1353$ & 1188385 & 0.5s &$0.0344$& $0.0363$\\
+FNO interpolation & $1681$ & 1188353 & 0.5s &$0.0314$& $0.0508$ \\
+UNet interpolation & $1681$ & 7752961 & 0.9s &$0.0089$& $0.0531$ \\ 
+\hline
+\hline 
+\end{tabular}
+\end{center}
+\caption{Benchmark on elasticity. Inputs are point clouds.} 
+\label{table:elas}
+\end{table*}  
+
+\subsection{Fluid Mechanics}
+\label{ssec:fluid}
+% The governing equation of fluid flow is the compressible Navier-Stokes equation, different variants of it are used for different applications.
+
+\paragraph{Euler's Equation (Airfoil).}
+
+We consider the transonic flow over an airfoil, where the governing equation is Euler equation, as following, 
+\begin{align*}
+\frac{\partial \rho^f}{\partial t} + \nabla \cdot (\rho^f \bm{v}) = 0, \quad \quad
+\frac{\partial \rho^f\bm{u}}{\partial t} + \nabla \cdot (\rho^f \bm{v} \otimes \bm{v} + p \I) = 0, \quad \quad
+\frac{\partial E}{\partial t} + \nabla \cdot  \Bigl( (E + p)\bm{v} \Bigr) = 0 
+\end{align*}
+where $\rho^f$ is the fluid density, $\bm{v}$ is the velocity vector, $p$ is the pressure, and $E$ is the total energy. The viscous effect is ignored. The far-field boundary condition is 
+$\rho_{\infty} = 1 , p_{\infty}  = 1.0 , M_{\infty} = 0.8 , AoA = 0$
+where $M_{\infty}$ is the Mach number and $AoA$ is the angle of attack, and at the airfoil no-penetration condition is imposed. 
+The shape parameterization of the airfoil follows the design element approach~\cite{farin2014curves}.
+The initial NACA-0012 shape is mapped onto a 'cubic' design element with $8$ control nodes, and the initial shape is morphed to a different one following the displacement field of the control nodes of the design element. The displacements of control nodes are restrict to vertical direction only with prior $d\sim \mathbb{U}[-0.05, 0.05]$.
+We generate $1000$ training data and $200$ test data with a second-order implicit finite volume solver. The C-grid mesh with about ($200 \times 50$) quadrilateral elements is used, and the mesh is adapted near the airfoil but not the shock.
+It takes about $1$ CPU-hour for each simulation.
+The mesh point locations and Mach number on these mesh points are used as input and output data. 
+
+
+
+\paragraph{Navier-Stokes Equation (Pipe).}
+We consider the incompressible flow in a pipe, where the governing equation is incompressible Navier-Stokes equation, as following, 
+ \begin{align*}
+\frac{\partial \bm{v}}{\partial t} + (\bm{v}  \nabla) \bm{v} =-\nabla p + \mu \nabla^2 \bm{v}, \quad \quad 
+\nabla  \cdot  \bm{v} = 0
+\end{align*}
+where $\bm{v}$ is the velocity vector, $p$ is the pressure, and $\mu = 0.005$ is the viscosity. The parabolic velocity profile with maximum velocity $\bm{v} = [1, 0]$ is imposed at the inlet, free boundary condition is imposed at the outlet, and no-slip boundary condition is imposed at the pipe surface.
+The pipe is of length $10$ and width $1$, and the centerline of the pipe is parameterized by 4 piecewise cubic polynomials, which are determined by the vertical positions and slopes on $5$ spatially uniform control nodes. The vertical position at these control nodes obeys  $d\sim \mathbb{U}[-2, 2]$ and the slop at these control nodes obeys  $d\sim \mathbb{U}[-1, 1]$.
+We generate $1000$ training data and $200$ test data with an implicit finite element solver with about $4000$ Taylor-Hood Q2-Q1 mixed elements~\cite{huang2020high}.
+It takes about $70$ CPU seconds for each simulation.
+The mesh point locations ($129\times 129$) and horizontal velocity on these mesh points are used as input and output data. 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=14cm]{figures/gfno-design.png}
+    \caption{The inverse design for the airfoil flows problem with end-to-end optimization}
+    \label{fig:design}
+\end{figure}
+
+\begin{table*}
+\begin{center}
+\begin{tabular}{c|cc|cc|cc}
+\multicolumn{1}{c}{\bf Model}
+&\multicolumn{2}{|c}{\bf Airfoil}
+&\multicolumn{2}{|c}{\bf Pipe}
+&\multicolumn{2}{|c}{\bf Plasticity}\\
+& training & testing & training & testing & training & testing\\
+\hline 
+\hline 
+Geo-FNO & 0.0134 & \textbf{0.0138} & 0.0047 & \textbf{0.0067} & 0.0071 & \textbf{0.0074} \\
+% Geo-UNet & $0.0061$ & $0.0081$ & $0.0029$ & $0.0063$ & $-$ & $-$ \\
+% \hline
+FNO interpolation & $0.0287$ & $0.0421$ & $0.0083$ & $0.0151$ & $-$ & $-$  \\
+UNet interpolation & $0.0039$ & $0.0519$ & $0.0109$ & $0.0182$ & $-$ & $-$ \\
+\hline
+\hline 
+\end{tabular}\\
+{\small The Plasticity requires the mesh as a target output, so interpolation methods do not apply.}
+\end{center}
+\caption{Benchmark on airfoils, pipe flows, and plasticity. Inputs are structured meshes.} 
+\label{table:structured}
+\end{table*}  
+
+
+\paragraph{Discussion.} As shown in Table \ref{table:elas}, the geo-FNO model has a significant lower error rates compared direct interpolation on existing ML-based PDE solvers such as the standard FNO\citep{li2020fourier} and UNet\citep{ronneberger2015u}. Both FNO+interpolation and UNet+interpolation methods has a testing error larger that $5\%$, which is likely caused by the interpolation error. Geo-FNO also has a lower error rate compared to mesh-free methods such as Graph neural operators (GNO) \citep{li2020neural} and DeepONet \citep{lu2019deeponet} due to the advantages of the spectral transform,  similar to standard FNO \citep{de2022cost}. Notice that the geo-FNO with a learned deformation has a better accuracy compared to geo-FNO with fixed heuristic deformations (R-mesh) and (O-mesh).
+A visualization of the learned deformation $\phi^{-1}$ is given in the appendix.
+Similarly, in the airfoils and pipes flows, geo-FNO also outperforms interpolation based method, which directly interpolate the target on a larger rectangular space, as shown in Table \ref{table:structured}. 
+On these cases, since the data is given on a structured mesh, the deformation \eqref{eq:structured} is optimal, so there is no need to learn a deformation. Geo-FNO is equivalent to directly applying the standard FNO on the structured mesh.
+In summary, Geo-FNO extends FNO to general geometries. It perseveres the speed of standard FNO with an inference time around $0.01$ second per instance across all experiments. As a result, geo-FNO accelerates the numerical solvers up to $10^5$ times on the airfoil problem.
+
+\paragraph{Inverse design.} Once the geo-FNO model is trained, it can be used to do the inverse design.  We can directly optimize the design parameters to achieve the design goal. For example, as shown in the Figure \ref{fig:design}, the shape of the airfoil is parameterized by the seven spline nodes. We set the design goal as to minimize the drag and maximize the lift. We first train the model maps from the input mesh to the output pressure field, and optimize the spline nodes in an end-to-end manner. As shown in the figure, the resulting airfoil becomes asymmetry with larger upper camber over the optimization iteration, which increases the lift coefficient and matches the physical intuition. We use the numerical solver to verify the design parameters found by the machine learning model. The simulation from the numerical solver matches the prediction with a drag of $0.04$ and a lift of $0.29$.
+
+\section{Conclusion and future works}
+\label{sec:conclusion}
+
+In this work, we propose a geometry-aware FNO framework (geo-FNO) that applies to arbitrary geometries and a variety of input formats.
+The geo-FNO deforms the irregular input domain into a uniform latent mesh on which the FFT can be applied. Such deformation can be fixed or learned with the FNO architecture in an end-to-end manner. The geo-FNO combines both the computational efficiency of the FFT  and the flexibility of learned deformations. It is as fast as the original FNO but can represent the variations in solutions and domain shapes more efficiently and accurately.
+
+
+We mainly considered regular topology that is homeomorphic to a ball. In principle, our geo-FNO framework can be directly extended to general topologies. Given complex input topology we can apply the decomposition techniques such as triangle tessellation to divide the domain into sub-domains such as each sub-domain is regular. Similarly, for other input formats such as the signed distance functions (SDF), we can sample collocation points. Furthermore, it is possible to extend the geo-FNO framework to physics-informed neural operator setting \citep{li2021physics}. Since the deformation is parameterized by a neural network, we can obtain the exact derivatives and apply the chain rule to compute the residual error. We leave these directions as exciting future results.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+
+% \section{Appendix}
+% \bibliographystyle{unsrtnat}
+\bibliographystyle{unsrt}
+\bibliography{ref}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\iffalse
+\newpage
+\section*{Checklist}
+
+
+%%% BEGIN INSTRUCTIONS %%%
+The checklist follows the references.  Please
+read the checklist guidelines carefully for information on how to answer these
+questions.  For each question, change the default \answerTODO{} to \answerYes{},
+\answerNo{}, or \answerNA{}.  You are strongly encouraged to include a {\bf
+justification to your answer}, either by referencing the appropriate section of
+your paper or providing a brief inline description.  For example:
+\begin{itemize}
+  \item Did you include the license to the code and datasets? \answerYes{See Section~\ref{gen_inst}.}
+  \item Did you include the license to the code and datasets? \answerNo{The code and the data are proprietary.}
+  \item Did you include the license to the code and datasets? \answerNA{}
+\end{itemize}
+Please do not modify the questions and only use the provided macros for your
+answers.  Note that the Checklist section does not count towards the page
+limit.  In your paper, please delete this instructions block and only keep the
+Checklist section heading above along with the questions/answers below.
+%%% END INSTRUCTIONS %%%
+
+
+\begin{enumerate}
+
+
+\item For all authors...
+\begin{enumerate}
+  \item Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
+   \answerYes{}
+  \item Did you describe the limitations of your work?
+   \answerYes{See section \ref{sec:conclusion}}
+  \item Did you discuss any potential negative societal impacts of your work?
+   \answerNo{This work tailors to solve partial differential equations in science and engineering. It doesn't have immediate societal impacts.}
+  \item Have you read the ethics review guidelines and ensured that your paper conforms to them?
+    \answerYes{}
+\end{enumerate}
+
+
+\item If you are including theoretical results...
+\begin{enumerate}
+  \item Did you state the full set of assumptions of all theoretical results?
+    \answerNA{}
+        \item Did you include complete proofs of all theoretical results?
+    \answerNA{}
+\end{enumerate}
+
+
+\item If you ran experiments...
+\begin{enumerate}
+  \item Did you include the code, data, and instructions needed to reproduce the main experimental results (either in the supplemental material or as a URL)?
+    \answerYes{We will provide the code and datasets.}
+  \item Did you specify all the training details (e.g., data splits, hyperparameters, how they were chosen)?
+    \answerYes{}
+        \item Did you report error bars (e.g., with respect to the random seed after running experiments multiple times)?
+    \answerNo{}
+        \item Did you include the total amount of compute and the type of resources used (e.g., type of GPUs, internal cluster, or cloud provider)?
+    \answerYes{}
+\end{enumerate}
+
+
+\item If you are using existing assets (e.g., code, data, models) or curating/releasing new assets...
+\begin{enumerate}
+  \item If your work uses existing assets, did you cite the creators?
+    \answerNA{}
+  \item Did you mention the license of the assets?
+    \answerNA{}
+  \item Did you include any new assets either in the supplemental material or as a URL?
+    \answerNA{}
+  \item Did you discuss whether and how consent was obtained from people whose data you're using/curating?
+    \answerNA{}
+  \item Did you discuss whether the data you are using/curating contains personally identifiable information or offensive content?
+    \answerNA{}
+\end{enumerate}
+
+
+\item If you used crowdsourcing or conducted research with human subjects...
+\begin{enumerate}
+  \item Did you include the full text of instructions given to participants and screenshots, if applicable?
+    \answerNA{}
+  \item Did you describe any potential participant risks, with links to Institutional Review Board (IRB) approvals, if applicable?
+    \answerNA{}
+  \item Did you include the estimated hourly wage paid to participants and the total amount spent on participant compensation?
+    \answerNA{}
+\end{enumerate}
+
+\end{enumerate}
+
+\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{table}[h]
+\caption{table of notations}
+\label{table:notations}
+\begin{center}
+\begin{tabular}{|l|l|}
+\multicolumn{1}{c}{\bf Notation} 
+&\multicolumn{1}{c}{\bf Meaning}\\
+\hline
+{\bf Fourier neural operator} &\\
+$u \in \mathcal{U}$ & The solution function.\\
+$\Gtrue$ & The target solution operator.\\
+$\F, \F^{-1}$ & Fourier transformation and its inverse.\\
+$R$ & The linear transformation applied on the lower Fourier modes.\\
+$W$ & The linear transformation (bias term) applied on the spatial domain. \\
+$k$ & Fourier modes / wave numbers.\\
+\hline
+{\bf Physical Domain} &\\
+$a \in \mathcal{A}$  & the geometry parameters \\
+$D_a$  & the physical domain. \\
+$x \in D_a$  & the spatial coordinate of the physical domain. \\
+$\T_a = \{x_i\}$  & the meshes of the physical domain  \\
+$u, v \in \mathcal{U}(D_a)$ & functions defined on the physical domain\\
+$\psi_a \in \mathcal{L}(D_a)$ & the deformed Fourier basis defined on the physical domain.\\
+\hline
+{\bf Computational Domain} &\\
+$\phi, \phi_a$ & the coordinate transform maps from the computational domain \\ to & the physical domain.\\
+$D^c$  & the computational domain (unit torus). \\
+$\xi \in D^c$  & the spatial coordinate of the computational domain. \\
+$\T^c = \{\xi_i\}$  & the meshes of the computational domain  (a uniform mesh). \\
+$u^c, v^c \in \mathcal{U}(D^c)$ & functions defined on the computational domain.\\
+$\psi^c \in \mathcal{L}(D^c)$ & the standard Fourier basis defined on the computational domain.\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\section{Experiments}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=14cm]{figures/elasticity-meshes.png}
+    \caption{Interpolation into different meshes for the elasticity problem}
+    \label{fig:meshes}
+    {\small  
+    The first column is the original unstructured input; the second column is the interpolated input; the third column is the prediction; the last column is the error. As shown in the figures, interpolation causes error, which is less accurate than geometry-aware methods.} 
+\end{figure}
+
+We compare the Geo-FNO against other machine learning models on PDEs with various geometries. As shown in Figure \ref{fig:solid} and \ref{fig:fluid}, Geo-FNO can be applied on irregular domains and non-uniform meshes. It is more accurate than direct interpolation on existing ML-based PDE solvers such as the standard FNO\citep{li2020fourier} and UNet\citep{ronneberger2015u}, as well as mesh-free methods such as Graph neural operators (GNO) \citep{li2020neural} and DeepONet \citep{lu2019deeponet}. Meanwhile, Geo-FNO perseveres the speed of standard FNO. It can accelerate the numerical solvers up to $10^5$ times on the airfoil problem. All experiments are performed on a single Nvidia 3090 GPU. With no special mention, we train all the models with 500 epochs with an initial learning rate of $0.001$ which decays by half every 100 epochs. We use the relative L2 error for both the training and testing. The hyperparameter choice of each model is selected by tuning the number of layers and the width (channel dimension) keeping the total number of parameters of the same magnitude. The hyperparameter is given in the following discussion.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=10cm]{figures/gfno-iphi.png}
+    \caption{Visualization of $\phi^{-1}$}
+    \label{fig:iphi}
+    {\small The left column is the prediction of Geo-FNO on the physical space $\G_\theta(a)(x)$; the right column is the prediction of Geo-FNO on the computational space $\G_\theta(a)(\xi) = \G_\theta(a)(\phi^{-1}(x))$. The top row is the solution on the input mesh. The bottom row is the full-field solution. The latent space has a cleaner wave structure.}
+\end{figure}
+
+\subsection{Benchmark models on elasticity}
+The elasticity problem has an unstructured input format. We compare the mesh-invariant methods such as Geo-FNO, Graph neural operator (GNO), and Deep operator network (DeepONet), as well as interpolation-based methods including uniform meshes (FNO, UNet) and heuristic adaptive meshes (R-mesh, O-mesh).
+\begin{itemize}
+\item GNO: Since the graph structure is flexible on the problem geometry, graph neural networks have been widely used for complex geometries \citep{sanchez2020learning, pfaff2020learning}. In this work, we compare with the graph kernel operator \citep{li2020neural,li2020multipole}, which is a graph neural network-based neural operator model. It implements the linear operator $\mathcal{K}$ by message passing on graphs. We build a full graph with edge connection radius $r=0.2$, width $64$ and kernel with $128$.
+\item DeepONet: the deep operator network \citep{lu2019deeponet} is a line of works designed with respect to the linear approximation of operator as shown in \citep{chen1995universal}. It has two neural networks a trunk net and a branch net to represent the basis and coefficients of the operator. Both DeepONets and neural operators aim to parameterize infinitely dimensional solution operators, but neural operators directly output the full field solution functions, while DeepONets output the solution at specific query points. This design difference makes neural operators, especially FNO, have an advantage when the data are fully observed while DeepONet has an advantage when the data are partially observed. In this work, we use five layers for both the trunk net and branch net, each with a width of $256$.
+\item FNO interpolation: as a baseline, we simply interpolate the input point cloud into a 41-by-41 uniform grid and train a plain FNO model \citep{li2020fourier}. As shown in the figure \ref{fig:meshes} (c), the interpolation causes an interpolation error, which loses information on the singularities (the red regions). As a result, the testing error is constantly higher than $5\%$.
+\item UNet interpolation: Similar, we train a UNet model \citep{ronneberger2015u} on the interpolated uniform grid. As FNO-interpolation, the error is constantly higher than $5\%$ as shown in the figure \ref{fig:meshes} (d).
+\item Geo-FNO (R mesh): We consider a heuristic adaptive mesh method for each input geometry by deforming a uniform 41 by 41 grid , as shown in the figure
+\ref{fig:meshes} (a). The stretching is applied in the radial direction originated at the void center~$(0.5,\,0.5)$ to attain finer mesh near the interface of the void. Let $r$ denote the radial distance of mesh points, the deformation map is
+ \begin{align*}
+     r \rightarrow
+     \begin{cases}
+     r_s  + \alpha(r - r_s) + (1-\alpha)\frac{(r - r_s)^2}{r_e - r_s} & r \geq r_s\\
+     r_s  - \alpha(r_s - r) - (1-\alpha)\frac{(r_s - r)^2}{r_s}   & r \leq r_s
+     \end{cases}
+ \end{align*}
+ where $r_s$ and $r_e$ denote the void radius and the unit cell radius  in this radial direction, $\alpha=0.2$ denotes the stretching factor, where the ratio of mesh sizes between these near the void interface and these near the unit cell boundary is about $\frac{\alpha}{2-\alpha}$. It is worth mentioning that the deformation map remains void interface, the origin, and the unit cell boundary. Once the adaptive meshes are generated, we interpolate the input data to the adaptive meshes. The surrogate model is learned on the adaptive meshes. We used four Fourier layers with mode $12$ and width $32$.
+\item Geo-FNO (O mesh): Similarly, we design another heuristic adaptive mesh method with cylindrical meshing, as shown in the figure \ref{fig:meshes} (b). A body-fitted O-type mesh is generated for each geometry with $64$ points in the azimuth direction and $41$ points in the radial direction.  The points in the azimuth direction are uniformly located between $0$ and $2\pi$, and the points in the radial direction are uniformly located between $r_s$ and $r_e$, where $r_s$ and $r_e$ denote the void radius and the unit cell radius. Again, we interpolate the input data to the adaptive meshes. The surrogate model is learned on the adaptive meshes. We used four Fourier layers with mode $12$ and width $32$.
+\end{itemize}
+
+
+\paragraph{Visualization of $\phi^{-1}$.} 
+Figure \ref{fig:iphi} shows the effects of the coordinate transform, where (a) is the prediction $\G_\theta(a)(x)$ on the original physical mesh and (b) is the prediction on the computational mesh (without transforming back to the physical space) $\G_\theta(a)(\phi^{-1}(x))$. 
+The top row visualizes the solution on the original mesh $T^i$ and $\phi^{-1}(T^i)$, while the bottom row is the full field solution on $T^c$ directly evaluated on the Fourier coefficients.
+The solution on the latent space has more "white region", which is latent encoding that does not show up in the final solution. These latent encoding is similar to the Fourier continuation, making the solution easier to be represented with the Fourier basis.
+As shown in the figure, the solution function on the computational mesh has a cleaner wave structure and is more periodic compared to the physical space, allowing it to be better represented by the Fourier basis.
+Interestingly, there exists a vertical discontinuity on the latent space around $x=0.5$ in the latent encoding. Since most features are horizontal, the vertical discontinuity does not affect the output. The gap can be seen as a result of encoding in the high-dimensional channel space.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/gfno-flow-appendix.png}
+    \caption{Geo-FNO vs FNO-interpolation on fluid mechanics}
+    \label{fig:flow-appendix}
+    {\small  
+    The first row is the ground truth; the second row is the prediction; the last row is the error. As shown in the figures, interpolation causes error, which makes interp-FNO less accurate compared to geo-FNO.} 
+\end{figure}
+
+\subsection{Benchmark models on Plasticity, Airfoil, and Pipe flows.}
+For the airfoil flow and pipe flow problems, the data are generated on structured meshes. In this case, the coordinate transform is defined as \eqref{eq:structured}, and the Geo-FNO model reduce to running the plain FNO on the structured meshes. As a comparison, we study the interpolation method which interpolates the input into a uniform mesh on a larger rectangle domain $\omega$, as used in \citep{lu2021comprehensive}. As shown in Figure \ref{fig:flow-appendix}, the interpolation causes an error and loses accuracy. Embedding into the rectangle domain is also wasteful and less efficient. As a result, FNO with the structured grid has a better performance compared to FNO with the interpolated uniform grid.
+
+The plasticity is a time-dependent problem, so we used the FNO3d model as the backbone to do convolution in both spatial dimension and temporal dimension. In this experiment, Geo-FNO outputs both the position of the grid as well as the displacement at each grid point. As shown in Figure \ref{fig:plas}, geo-FNO correctly predicts the evolution of the shape and the displacement. It has a moderate error on the top of the material, which is flat in the ground truth but curved in the prediction. 
+
+\subsection{Constitutive models used for structural mechanics tests}
+We elaborate on the constitutive laws which are omitted in the main text.
+\paragraph{Hyper-elastic material.} 
+The hyper-elastic constitutive model of the material is given by 
+\begin{align*}
+\sigma &= \frac{\partial w(\epsilon)}{\partial \epsilon}\\
+ w(\epsilon) &= C_1(I_1 - 3) + C_2(I_2 - 3)
+\end{align*}
+where $I_1 = tr(C)$ and $I_2 = \frac{1}{2}[(tr(C)^2 - trC^2]$ are scalar invariants of the right Cauchy Green stretch tensor $C = 2\epsilon+1$.
+
+
+
+
+\paragraph{Plasticity}
+The elasto-plastic constitutive model 
+of the material is given by 
+\begin{align*}
+\sigma &= \textbf{C} : (\epsilon-\epsilon_p)\\
+\dot{\epsilon}_p &= \lambda \nabla_{\sigma} f(\sigma)\\
+f(\sigma) &= \sqrt{\frac{3}{2}}|\sigma-\frac{1}{3}\text{tr}(\sigma)\cdot I|_F - \sigma_Y
+\end{align*}
+where $\lambda$ is the plastic multiplier constrained by
+$\lambda \geq 0 , f(\sigma)  \leq 0, $
+and 
+$\lambda \cdot f(\sigma)  = 0.$
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/gfno-plas.png}
+    \caption{Geo-FNO on Plasticity}
+    \label{fig:plas}
+    {\small The top row is the truth and the bottom row is the prediction. The five column represent the changes in time. The color represent the norm of the displacement.}
+\end{figure}
+
+
+\section{Discussions and Extensions}
+In the end, we also discussed two potential extensions of Geo-FNO.
+
+\subsection{Geometry-aware physics-informed neural operator}
+In this work, we mainly consider learning surrogate models in the data-driven setting. However, the dataset may not always be available. In this case, we can use the physics-informed setting by optimizing the physics-informed equation loss.
+
+Given a fixed input $a$, the output function $u = \G_\theta(a)$ can be explicitly written out using formula \eqref{eq:G} and \eqref{eq:iFa}. The derivative of the deformed basis $\psi_a = e^{2i \pi \langle \phi^{-1}(x), k \rangle}$ can be exactly computed using chain rule with the auto-differentiation of the neural network $ \phi^{-1} $. Using the exact gradient, one can minimize the residual error $\R(\G_\theta(a))$ to find out the parameter $\G_\theta(a)$ that represent the solution function. The Geo-PINO method will be an optimization based spectral method for general geometry.
+
+\subsection{General topologies}
+In this work, we mainly studied simple topologies of 2D disks or 2D disks with holes. If the problem topology is more challenging, there does not exist a diffeomorphism from the physical space to the uniform computational space. Thankfully, we can use the Fourier continuation and decomposition to convert the problem domain into simpler ones. It is known that 2D connected orientable surfaces can be classified as either a sphere or n-genus torus. For spheres, it is natural to use the unit sphere as the computational space and the spherical harmonics as the computational basis. For n-genus torus ($n\geq 2$), usually, there do not exist useful harmonics series, but we can decompose the domain, which requires training multiple FNO models on each of the sub-domain in a coupled manner. We leave the domain decomposition as exciting future work. 
+
+\subsection{Theoretical guarantees.}
+In the end, it will be interesting to extend the universal approximation bound of Fourier neural operator\citep{kovachki2021universal} to the solution operator of PDEs defined on general geometries. In \cite{kovachki2021universal}, the approximation is achieved by using existing pseudo-spectral solvers. Since FNO's architecture can approximate the operation in the pseudo-spectral solvers, FNO can approximate the target solution operators. For general domains, usually, there does not exist a pseudo-spectral solver. However, we can transform the problem into the computational space. By applying the universal approximation bound on the deformed equation $\R^c = 0$, as well as the approximation bound for the neural network $\phi^{-1}$, it is possible to obtain a bound for geo-FNO. We also leave this direction as future work. 
+
+\end{document}

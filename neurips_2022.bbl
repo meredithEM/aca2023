@@ -1,0 +1,191 @@
+\begin{thebibliography}{10}
+
+\bibitem{babuvska1990p}
+Ivo Babu{\v{s}}ka and Manil Suri.
+\newblock The p-and hp versions of the finite element method, an overview.
+\newblock {\em Computer methods in applied mechanics and engineering},
+  80(1-3):5--26, 1990.
+
+\bibitem{huang2010adaptive}
+Weizhang Huang and Robert~D Russell.
+\newblock {\em Adaptive moving mesh methods}, volume 174.
+\newblock Springer Science \& Business Media, 2010.
+
+\bibitem{gottlieb1977numerical}
+David Gottlieb and Steven~A Orszag.
+\newblock {\em Numerical analysis of spectral methods: theory and
+  applications}.
+\newblock SIAM, 1977.
+
+\bibitem{Zabaras}
+Yinhao Zhu and Nicholas Zabaras.
+\newblock Bayesian deep convolutional encoder–decoder networks for surrogate
+  modeling and uncertainty quantification.
+\newblock {\em Journal of Computational Physics}, 2018.
+
+\bibitem{bhatnagar2019prediction}
+Saakaar Bhatnagar, Yaser Afshar, Shaowu Pan, Karthik Duraisamy, and Shailendra
+  Kaushik.
+\newblock Prediction of aerodynamic flow fields using convolutional neural
+  networks.
+\newblock {\em Computational Mechanics}, pages 1--21, 2019.
+
+\bibitem{allen2022physical}
+Kelsey~R Allen, Tatiana Lopez-Guevara, Kimberly Stachenfeld, Alvaro
+  Sanchez-Gonzalez, Peter Battaglia, Jessica Hamrick, and Tobias Pfaff.
+\newblock Physical design using differentiable learned simulators.
+\newblock {\em arXiv preprint arXiv:2202.00728}, 2022.
+
+\bibitem{sanchez2020learning}
+Alvaro Sanchez-Gonzalez, Jonathan Godwin, Tobias Pfaff, Rex Ying, Jure
+  Leskovec, and Peter~W Battaglia.
+\newblock Learning to simulate complex physics with graph networks.
+\newblock {\em arXiv preprint arXiv:2002.09405}, 2020.
+
+\bibitem{li2020neural}
+Zongyi Li, Nikola Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik
+  Bhattacharya, Andrew Stuart, and Anima Anandkumar.
+\newblock Neural operator: Graph kernel network for partial differential
+  equations.
+\newblock {\em arXiv preprint arXiv:2003.03485}, 2020.
+
+\bibitem{li2020multipole}
+Zongyi Li, Nikola Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik
+  Bhattacharya, Andrew Stuart, and Anima Anandkumar.
+\newblock Multipole graph neural operator for parametric partial differential
+  equations, 2020.
+
+\bibitem{lu2019deeponet}
+Lu~Lu, Pengzhan Jin, and George~Em Karniadakis.
+\newblock Deeponet: Learning nonlinear operators for identifying differential
+  equations based on the universal approximation theorem of operators.
+\newblock {\em arXiv preprint arXiv:1910.03193}, 2019.
+
+\bibitem{li2020fourier}
+Zongyi Li, Nikola Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik
+  Bhattacharya, Andrew Stuart, and Anima Anandkumar.
+\newblock Fourier neural operator for parametric partial differential
+  equations, 2020.
+
+\bibitem{de2022cost}
+Maarten De~Hoop, Daniel~Zhengyu Huang, Elizabeth Qian, and Andrew~M Stuart.
+\newblock The cost-accuracy trade-off in operator learning with neural
+  networks.
+\newblock {\em arXiv preprint arXiv:2203.13181}, 2022.
+
+\bibitem{pathak2022fourcastnet}
+Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh
+  Chattopadhyay, Morteza Mardani, Thorsten Kurth, David Hall, Zongyi Li, Kamyar
+  Azizzadenesheli, et~al.
+\newblock Fourcastnet: A global data-driven high-resolution weather model using
+  adaptive fourier neural operators.
+\newblock {\em arXiv preprint arXiv:2202.11214}, 2022.
+
+\bibitem{yang2021seismic}
+Yan Yang, Angela~F Gao, Jorge~C Castellanos, Zachary~E Ross, Kamyar
+  Azizzadenesheli, and Robert~W Clayton.
+\newblock Seismic wave propagation and inversion with neural operators.
+\newblock {\em The Seismic Record}, 1(3):126--134, 2021.
+
+\bibitem{wen2022u}
+Gege Wen, Zongyi Li, Kamyar Azizzadenesheli, Anima Anandkumar, and Sally~M
+  Benson.
+\newblock U-fno--an enhanced fourier neural operator-based deep-learning model
+  for multiphase flow.
+\newblock {\em Advances in Water Resources}, page 104180, 2022.
+
+\bibitem{lu2022comprehensive}
+Lu~Lu, Xuhui Meng, Shengze Cai, Zhiping Mao, Somdatta Goswami, Zhongqiang
+  Zhang, and George~Em Karniadakis.
+\newblock A comprehensive and fair comparison of two neural operators (with
+  practical extensions) based on fair data.
+\newblock {\em Computer Methods in Applied Mechanics and Engineering},
+  393:114778, 2022.
+
+\bibitem{li2021physics}
+Zongyi Li, Hongkai Zheng, Nikola Kovachki, David Jin, Haoxuan Chen, Burigede
+  Liu, Kamyar Azizzadenesheli, and Anima Anandkumar.
+\newblock Physics-informed neural operator for learning partial differential
+  equations.
+\newblock {\em arXiv preprint arXiv:2111.03794}, 2021.
+
+\bibitem{mildenhall2020nerf}
+Ben Mildenhall, Pratul~P Srinivasan, Matthew Tancik, Jonathan~T Barron, Ravi
+  Ramamoorthi, and Ren Ng.
+\newblock Nerf: Representing scenes as neural radiance fields for view
+  synthesis.
+\newblock In {\em European conference on computer vision}, pages 405--421.
+  Springer, 2020.
+
+\bibitem{sitzmann2020implicit}
+Vincent Sitzmann, Julien~NP Martel, Alexander~W Bergman, David~B Lindell, and
+  Gordon Wetzstein.
+\newblock Implicit neural representations with periodic activation functions.
+\newblock {\em arXiv preprint arXiv:2006.09661}, 2020.
+
+\bibitem{bruno2007accurate}
+Oscar~P Bruno, Youngae Han, and Matthew~M Pohlman.
+\newblock Accurate, high-order representation of complex three-dimensional
+  surfaces via fourier continuation analysis.
+\newblock {\em Journal of computational Physics}, 227(2):1094--1125, 2007.
+
+\bibitem{ronneberger2015u}
+Olaf Ronneberger, Philipp Fischer, and Thomas Brox.
+\newblock U-net: Convolutional networks for biomedical image segmentation.
+\newblock In {\em International Conference on Medical image computing and
+  computer-assisted intervention}, pages 234--241. Springer, 2015.
+
+\bibitem{pascon2019large}
+Jo{\~a}o~Paulo Pascon.
+\newblock Large deformation analysis of plane-stress hyperelastic problems via
+  triangular membrane finite elements.
+\newblock {\em International Journal of Advanced Structural Engineering},
+  11(3):331--350, 2019.
+
+\bibitem{huang2020learning}
+Daniel~Z Huang, Kailai Xu, Charbel Farhat, and Eric Darve.
+\newblock Learning constitutive relations from indirect observations using deep
+  neural networks.
+\newblock {\em Journal of Computational Physics}, 416:109491, 2020.
+
+\bibitem{0b112d0e5eba4b7f9768cfe1d818872e}
+Michael Smith.
+\newblock {\em ABAQUS/Standard User's Manual, Version 6.9}.
+\newblock Dassault Syst{\`e}mes Simulia Corp, United States, 2009.
+
+\bibitem{farin2014curves}
+Gerald Farin.
+\newblock {\em Curves and surfaces for computer-aided geometric design: a
+  practical guide}.
+\newblock Elsevier, 2014.
+
+\bibitem{huang2020high}
+Daniel~Z Huang, Will Pazner, Per-Olof Persson, and Matthew~J Zahr.
+\newblock High-order partitioned spectral deferred correction solvers for
+  multiphysics problems.
+\newblock {\em Journal of Computational Physics}, 412:109441, 2020.
+
+\bibitem{pfaff2020learning}
+Tobias Pfaff, Meire Fortunato, Alvaro Sanchez-Gonzalez, and Peter~W. Battaglia.
+\newblock Learning mesh-based simulation with graph networks, 2020.
+
+\bibitem{chen1995universal}
+Tianping Chen and Hong Chen.
+\newblock Universal approximation to nonlinear operators by neural networks
+  with arbitrary activation functions and its application to dynamical systems.
+\newblock {\em IEEE Transactions on Neural Networks}, 6(4):911--917, 1995.
+
+\bibitem{lu2021comprehensive}
+Lu~Lu, Xuhui Meng, Shengze Cai, Zhiping Mao, Somdatta Goswami, Zhongqiang
+  Zhang, and George~Em Karniadakis.
+\newblock A comprehensive and fair comparison of two neural operators (with
+  practical extensions) based on fair data.
+\newblock {\em arXiv preprint arXiv:2111.05512}, 2021.
+
+\bibitem{kovachki2021universal}
+Nikola Kovachki, Samuel Lanthaler, and Siddhartha Mishra.
+\newblock On universal approximation and error bounds for fourier neural
+  operators.
+\newblock {\em Journal of Machine Learning Research}, 22:Art--No, 2021.
+
+\end{thebibliography}
